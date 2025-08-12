@@ -1,0 +1,418 @@
+//register
+{
+    "name":"dhanalakshmi",
+    "email":"o180110@rguktong.ac.in",
+    "phone":"9490513643",
+    "password":"Shanvika@143",
+    "gender":"female",
+    "role_name":"rider"
+}
+
+//verify
+{
+    "email":"o180110@rguktong.ac.in",
+    "otp":"174100"
+}
+
+//o180110
+{
+    "message": "Email verified successfully",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZDk1NWE3OGJlOWNhMDExNzU3M2EwIiwicm9sZV9uYW1lIjoicmlkZXIiLCJpYXQiOjE3NDc4MTgyNDksImV4cCI6MTc0NzkwNDY0OX0.GTkBzkN_tYlDsV4NEqCwjwNkRuf3lBhpD5H5KStheJo",
+    "user": {
+        "name": "dhanalakshmi",
+        "email": "o180110@rguktong.ac.in",
+        "phone": 9490513643,
+        "gender": "female",
+        "role": "rider"
+    }
+}
+
+//driver register
+
+<<<<<<< HEAD
+db.users.insertOne(
+  {
+    "name":"dhana",
+    "email":"dhanalakshmikarri728@gmail.com",
+    "phone":"8008210791",
+    "password":"Dhana@7443",
+=======
+{
+    "name":"dhana",
+    "email":"dhanalakshmikarri728@gmail.com",
+    "phone":"8008210791",
+    "password":"Shanvika@143",
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    "gender":"female",
+    "role_name":"driver",
+    "experience":3,
+    "license_number":"A12345B",
+    "vehicle_number":"TS 4521"
+}
+<<<<<<< HEAD
+)
+
+=======
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+
+//driver
+{
+    "message": "Email verified successfully",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZDk4ZjIxYWEwZTBkYWU0YTg4MjY0Iiwicm9sZV9uYW1lIjoiZHJpdmVyIiwiaWF0IjoxNzQ3ODE4OTUwLCJleHAiOjE3NDc5MDUzNTB9.kS6vO1BUAr6UJ0CYY1VmNwl2utlQGL_QhthqDBgvKDo",
+    "user": {
+        "name": "dhana",
+        "email": "dhanalakshmikarri728@gmail.com",
+        "phone": 8008210791,
+        "gender": "female",
+        "role": "driver"
+    }
+}
+
+"message": "Login successful",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZDk4ZjIxYWEwZTBkYWU0YTg4MjY0Iiwicm9sZV9uYW1lIjoiZHJpdmVyIiwiaWF0IjoxNzQ3ODk2NDgxLCJleHAiOjE3NDc5ODI4ODF9.0zMkhxuHjk5RHM6lYeKvSva3p2krGO-Z8W6RgSJJfJ4",
+    "user": {
+        "name": "dhana",
+        "email": "dhanalakshmikarri728@gmail.com",
+        "phone": 8008210791,
+        "gender": "female",
+        "role": "driver"
+    }
+//stops insertion
+db.stops.insertMany([
+    {stop_name:"Kotthaguda",stop_type:"origin",stop_order:"1",route_id:"route_KtoJB"},
+    {stop_name:"Hitec-city",stop_type:"intermediate",stop_order:"2",route_id:"route_KtoJB"},
+    {stop_name:"Durgam-cheruvu",stop_type:"intermediate",stop_order:"3",route_id:"route_KtoJB"},
+    {stop_name:"Madhapur",stop_type:"intermediate",stop_order:"4",route_id:"route_KtoJB"},
+    {stop_name:"Peddhamma-gudi",stop_type:"destination",stop_order:"5",route_id:"route_KtoJB"}
+    ])
+<<<<<<< HEAD
+db.stops.insertMany([
+    {stop_name:"Durgam-cheruvu",stop_type:"origin",stop_order:"1",route_id:"route_DCtoBG"},
+    {stop_name:"Peddhamma-gudi",stop_type:"intermediate",stop_order:"2",route_id:"route_DCtoBG"},
+    {stop_name:"Jubileehills-checkpost",stop_type:"intermediate",stop_order:"3",route_id:"route_DCtoBG"},
+    {stop_name:"Ameerpet",stop_type:"intermediate",stop_order:"4",route_id:"route_DCtoBG"},
+    {stop_name:"Begumpet",stop_type:"destination",stop_order:"5",route_id:"route_DCtoBG"}
+    ])
+=======
+
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+//Routes insertion
+db.routes.insertMany([
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03c"), // Stop A
+    end_stop_id: ObjectId("686b50e426177f7e9132a03d"),   // Stop B
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e3"), // Stop A
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e4"),   // Stop B
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1500,
+    time: 15,
+    cost: 20
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03c"), // Stop A
+    end_stop_id: ObjectId("686b50e426177f7e9132a03e"),   // Stop C
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e3"), // Stop A
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e5"),   // Stop C
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2000,
+    time: 20,
+    cost: 25
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03c"), // Stop A
+    end_stop_id: ObjectId("686b50e426177f7e9132a03f"),   // Stop D
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e3"), // Stop A
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e6"),   // Stop D
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2500,
+    time: 25,
+    cost: 30
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03c"), // Stop A
+    end_stop_id: ObjectId("686b50e426177f7e9132a040"),   // Stop E
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e3"), // Stop A
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e7"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 3000,
+    time: 30,
+    cost: 35
+  },
+  
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03d"), // Stop B
+    end_stop_id: ObjectId("686b50e426177f7e9132a03e"),   // Stop C
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e4"), // Stop B
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e5"),   // Stop C
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1500,
+    time: 15,
+    cost: 20
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03d"), // Stop B
+    end_stop_id: ObjectId("686b50e426177f7e9132a03f"),   // Stop D
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e4"), // Stop B
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e6"),   // Stop D
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2000,
+    time: 20,
+    cost: 25
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03d"), // Stop B
+    end_stop_id: ObjectId("686b50e426177f7e9132a040"),   // Stop E
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e4"), // Stop B
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e7"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2500,
+    time: 25,
+    cost: 30
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03e"), // Stop C
+    end_stop_id: ObjectId("686b50e426177f7e9132a03f"),   // Stop D
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e5"), // Stop C
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e6"),   // Stop D
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1500,
+    time: 10,
+    cost: 20
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03e"), // Stop C
+    end_stop_id: ObjectId("686b50e426177f7e9132a040"),   // Stop E
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e5"), // Stop C
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e7"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2000,
+    time: 15,
+    cost: 20
+  },
+  {
+    route_id:"route_KtoPG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b50e426177f7e9132a03f"), // Stop D
+    end_stop_id: ObjectId("686b50e426177f7e9132a040"),   // Stop E
+=======
+    start_stop_id: ObjectId("682d9bf69e369d8475d861e6"), // Stop D
+    end_stop_id: ObjectId("682d9bf69e369d8475d861e7"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 17,
+    time: 1000,
+    cost: 20
+  }
+])
+
+//admin
+{
+    "message": "Email verified successfully",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZGFmMTk1M2ZkOWY3YzNhZGQzYmY1Iiwicm9sZV9uYW1lIjoiYWRtaW4iLCJpYXQiOjE3NDc4MjQ1MTEsImV4cCI6MTc0NzkxMDkxMX0.yaXvxSU_m7-xso-_RmKqQfDRHmpdOgTlPGoDfykYSfQ",
+    "user": {
+        "name": "Ashok Kumar",
+        "email": "kola.ashoka@gmail.com",
+        "phone": 9177937959,
+        "gender": "male",
+        "role": "admin"
+    }
+}
+
+//stops(route_id:"route_DCtoBG")
+{
+    _id: ObjectId('6835504b59a577ea67d861e0'),
+    stop_name: 'Durgam-cheruvu',
+    stop_type: 'origin',
+    stop_order: 1,
+    route_id: 'route_DCtoBG'
+  },
+  {
+    _id: ObjectId('6835504b59a577ea67d861e1'),
+    stop_name: 'Peddhamma-gudi',
+    stop_type: 'intermediate',
+    stop_order: 2,
+    route_id: 'route_DCtoBG'
+  },
+  {
+    _id: ObjectId('6835511859a577ea67d861e2'),
+    stop_name: 'Jubileehills-checkpost',
+    stop_type: 'intermediate',
+    stop_order: 3,
+    route_id: 'route_DCtoBG'
+  },
+  {
+    _id: ObjectId('6835511859a577ea67d861e3'),
+    stop_name: 'Ameerpet',
+    stop_type: 'intermediate',
+    stop_order: 4,
+    route_id: 'route_DCtoBG'
+  },
+  {
+    _id: ObjectId('683552df59a577ea67d861e4'),
+    stop_name: 'Begumpet',
+    stop_type: 'destination',
+    stop_order: 5,
+    route_id: 'route_DCtoBG'
+  }
+
+  //routes
+
+  db.routes.insertMany([
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a041"), // Stop A
+    end_stop_id: ObjectId("686b522c26177f7e9132a042"),   // Stop B
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e0"), // Stop A
+    end_stop_id: ObjectId("6835504b59a577ea67d861e1"),   // Stop B
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2000,
+    time: 25,
+    cost: 30
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a041"), // Stop A
+    end_stop_id: ObjectId("686b522c26177f7e9132a043"),   // Stop C
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e0"), // Stop A
+    end_stop_id: ObjectId("6835511859a577ea67d861e2"),   // Stop C
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2500,
+    time: 30,
+    cost: 35
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a041"), // Stop A
+    end_stop_id: ObjectId("686b522c26177f7e9132a044"),   // Stop D
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e0"), // Stop A
+    end_stop_id: ObjectId("6835511859a577ea67d861e3"),   // Stop D
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 3000,
+    time: 35,
+    cost: 40
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a041"), // Stop A
+    end_stop_id: ObjectId("686b522c26177f7e9132a045"),   // Stop E
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e0"), // Stop A
+    end_stop_id: ObjectId("683552df59a577ea67d861e4"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 3500,
+    time: 40,
+    cost: 45
+  },
+  
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a042"), // Stop B
+    end_stop_id: ObjectId("686b522c26177f7e9132a043"),   // Stop C
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e1"), // Stop B
+    end_stop_id: ObjectId("6835511859a577ea67d861e2"),   // Stop C
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1000,
+    time: 15,
+    cost: 20
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a042"), // Stop B
+    end_stop_id: ObjectId("686b522c26177f7e9132a044"),   // Stop D
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e1"), // Stop B
+    end_stop_id: ObjectId("6835511859a577ea67d861e3"),   // Stop D
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1500,
+    time: 20,
+    cost: 25
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a042"), // Stop B
+    end_stop_id: ObjectId("686b522c26177f7e9132a045"),   // Stop E
+=======
+    start_stop_id: ObjectId("6835504b59a577ea67d861e1"), // Stop B
+    end_stop_id: ObjectId("683552df59a577ea67d861e4"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 2000,
+    time: 25,
+    cost: 30
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a043"), // Stop C
+    end_stop_id: ObjectId("686b522c26177f7e9132a044"),   // Stop D
+=======
+    start_stop_id: ObjectId("6835511859a577ea67d861e2"), // Stop C
+    end_stop_id: ObjectId("6835511859a577ea67d861e3"),   // Stop D
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1000,
+    time: 15,
+    cost: 20
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a043"), // Stop C
+    end_stop_id: ObjectId("686b522c26177f7e9132a045"),   // Stop E
+=======
+    start_stop_id: ObjectId("6835511859a577ea67d861e2"), // Stop C
+    end_stop_id: ObjectId("683552df59a577ea67d861e4"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1500,
+    time: 20,
+    cost: 25
+  },
+  {
+    route_id:"route_DCtoBG",
+<<<<<<< HEAD
+    start_stop_id: ObjectId("686b522c26177f7e9132a044"), // Stop D
+    end_stop_id: ObjectId("686b522c26177f7e9132a045"),   // Stop E
+=======
+    start_stop_id: ObjectId("6835511859a577ea67d861e3"), // Stop D
+    end_stop_id: ObjectId("683552df59a577ea67d861e4"),   // Stop E
+>>>>>>> f378f0adbf963587d0fca275863441d52fbb4319
+    distance: 1000,
+    time: 15,
+    cost: 20
+  }
+])
