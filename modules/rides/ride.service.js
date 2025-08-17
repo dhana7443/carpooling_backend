@@ -2,22 +2,30 @@ const Ride = require("./ride.model");
 const Stop = require("../stops/stop.model");
 const Route = require("../routes/route.model");
 const RideRequest=require("../rideRequests/rideRequest.model");
+const admin=require("../../config/firebase");
+const User=require("../users/user.model");
 
-
+//new create ride
 const createRide = async ({
   origin_stop_id,
   destination_stop_id,
   departure_time,
   available_seats
 }, { user_id }) => {
-  console.log('service file');
+
+  // Check if driver already has a pending or active ride
   const existingRide = await Ride.findOne({
     driver_id: user_id,
-    status: "Active"
+    status: { $in: ["Scheduled", "Active"] }
   });
 
   if (existingRide) {
-    throw new Error("You already have an active ride. Complete or cancel it before creating a new one.");
+    throw new Error("You already have a scheduled or active ride. Complete or cancel it before creating a new one.");
+  }
+
+  // Validate departure time
+  if (new Date(departure_time) <= new Date()) {
+    throw new Error("Departure time must be in the future.");
   }
 
   const originStop = await Stop.findById(origin_stop_id);
@@ -37,7 +45,8 @@ const createRide = async ({
     destination_stop_id: destinationStop._id,
     route_id: originStop.route_id,
     departure_time,
-    available_seats
+    available_seats,
+    status: "Scheduled" // default
   });
 
   await ride.save();
@@ -46,16 +55,13 @@ const createRide = async ({
   const stops = await Stop.find({ route_id: originStop.route_id })
     .sort({ stop_order: 1 })
     .select('_id stop_name stop_order');
-  console.log(stops)
-  // Get all subroutes (from-to pairs) for this route
+
+  // Get all subroutes
   const subroutes = await Route.find({ route_id: originStop.route_id })
     .select('start_stop_id end_stop_id distance time cost');
-  console.log(subroutes)
-  // Format: Map for faster lookup of stop name by ID
-  const stopMap = new Map();
-  stops.forEach(stop => stopMap.set(stop._id.toString(), stop.stop_name));
-  console.log(stopMap);
-  // Attach subroute info with stop names
+
+  const stopMap = new Map(stops.map(stop => [stop._id.toString(), stop.stop_name]));
+
   const subrouteDetails = subroutes.map(sr => ({
     from_stop_id: sr.start_stop_id,
     from_stop_name: stopMap.get(sr.start_stop_id.toString()),
@@ -65,7 +71,7 @@ const createRide = async ({
     time: sr.time,
     cost: sr.cost
   }));
-  console.log(subrouteDetails);
+
   return {
     message: "Ride created successfully",
     ride_id: ride._id,
@@ -78,7 +84,7 @@ const createRide = async ({
   };
 };
 
-
+//search rides
 const searchRidesByIntermediateStops = async (startStopName, endStopName, datetime) => {
   const startStops = await Stop.find({ stop_name: startStopName });
   const endStops = await Stop.find({ stop_name: endStopName });
@@ -114,6 +120,7 @@ const searchRidesByIntermediateStops = async (startStopName, endStopName, dateti
   const endOfDay = new Date(inputDateTime);
   endOfDay.setUTCHours(23, 59, 59, 999);
   console.log(endOfDay)
+
   let matchedRides = [];
 
   for (const { startStop, endStop } of validPairs) {
@@ -123,8 +130,9 @@ const searchRidesByIntermediateStops = async (startStopName, endStopName, dateti
         $gte: inputDateTime, // rides from now onward
         $lte: endOfDay,       // same day
       },
-      status: "Active",
+      status: { $in: ["Scheduled", "Active"] },
     })
+      .sort({departure_time:1})
       .populate("driver_id", "name email -_id")
       .populate("origin_stop_id", "stop_order stop_name -_id")
       .populate("destination_stop_id", "stop_order stop_name -_id");
@@ -185,9 +193,11 @@ const searchRidesByIntermediateStops = async (startStopName, endStopName, dateti
 };
 
 
+
+
 //get-rides
 const getActiveRidesByDriver = async (driverId) => {
-  const rides = await Ride.find({ driver_id: driverId ,status:"Active"})
+  const rides = await Ride.find({ driver_id: driverId ,status: { $in: ["Scheduled", "Active"] }})
     .populate("driver_id", "name -_id") 
     .populate("origin_stop_id", "stop_name -_id")
     .populate("destination_stop_id", "stop_name -_id")
@@ -209,9 +219,88 @@ const getActiveRidesByDriver = async (driverId) => {
   return formattedRides;
 };
 
+const cancelAffectedRideRequestsDueToRouteChange = async (rideId, newRouteId) => {
+  // 1. Get the new route's stops in correct order
+  const routeStops = await Stop.find({ route_id: newRouteId }).sort({ stop_order: 1 }).lean();
+
+  // Create a lookup map by stop name → stop order
+  const stopOrderMap = routeStops.reduce((map, stop) => {
+    map[stop.stop_name.toLowerCase()] = stop.stop_order; // normalize case
+    return map;
+  }, {});
+
+  // 2. Get all pending or accepted ride requests for this ride
+  const requests = await RideRequest.find({
+    ride_id: rideId,
+    status: { $in: ['Pending', 'Accepted'] },
+  }).lean();
+
+  if (!requests.length) {
+    return { message: 'No ride requests to check' };
+  }
+
+  // 3. Filter which requests to cancel
+  const requestsToCancel = [];
+  const validRequests = [];
+
+  for (const req of requests) {
+    const fromOrder = stopOrderMap[req.from_stop?.toLowerCase()];
+    const toOrder = stopOrderMap[req.to_stop?.toLowerCase()];
+
+    // If stops don't exist in new route OR order is wrong → cancel
+    if (!fromOrder || !toOrder || fromOrder >= toOrder) {
+      requestsToCancel.push(req);
+    } else {
+      validRequests.push(req);
+    }
+  }
+
+  // 4. Cancel invalid requests
+  if (requestsToCancel.length) {
+    const cancelIds = requestsToCancel.map(r => r._id);
+    const updateResult = await RideRequest.updateMany(
+      { _id: { $in: cancelIds } },
+      { $set: { status: 'Rejected' } }
+    );
+
+    // 5. Notify riders for cancelled requests
+    const riderIds = [...new Set(requestsToCancel.map(r => r.rider_id.toString()))];
+    const riders = await User.find({ _id: { $in: riderIds } }).select('fcmToken');
+    console.log("riders:",riders);
+    await Promise.all(
+      riders.map(async (rider) => {
+        if (!rider.fcmToken) return;
+        try {
+          await admin.messaging().send({
+            token: rider.fcmToken,
+            notification: {
+              title: 'Ride Request Cancelled',
+              body: 'Your ride request was cancelled because the new route does not cover your requested stops in correct order.',
+            },
+          });
+        } catch (err) {
+          console.error(`Failed to notify rider ${rider._id}:`, err);
+        }
+      })
+    );
+
+    return {
+      message: 'Invalid ride requests cancelled after route change',
+      cancelledCount: updateResult.modifiedCount || updateResult.nModified,
+      validRequestsCount: validRequests.length
+    };
+  }
+
+  return {
+    message: 'All existing requests are valid for the new route',
+    cancelledCount: 0,
+    validRequestsCount: validRequests.length
+  };
+};
+
+
 //update-ride
 const updateRideById = async (rideId, driverId, updates) => {
-  // Only allow certain fields to be updated
   const allowedFields = ['origin_stop_id', 'destination_stop_id', 'departure_time', 'available_seats'];
   const filteredUpdates = {};
 
@@ -221,13 +310,27 @@ const updateRideById = async (rideId, driverId, updates) => {
     }
   }
 
-  // If origin or destination stop is changing, validate and get route_id
-  if (filteredUpdates.origin_stop_id || filteredUpdates.destination_stop_id) {
-    const ride = await Ride.findById(rideId);
-    if (!ride || ride.driver_id.toString() !== driverId.toString()) {
-      throw new Error("Ride not found or not owned by this driver");
-    }
+  // Find current ride first
+  const ride = await Ride.findById(rideId);
+  if (!ride || ride.driver_id.toString() !== driverId.toString()) {
+    throw new Error("Ride not found or not owned by this driver");
+  }
 
+  // Block update if ride already started or finished
+  if (ride.status !== "Scheduled") {
+    throw new Error("Cannot update ride once it has started or completed");
+  }
+
+  // Validate departure_time if provided
+  if (filteredUpdates.departure_time) {
+    if (new Date(filteredUpdates.departure_time) <= new Date()) {
+      throw new Error("Departure time must be in the future");
+    }
+  }
+
+  // Check if route changed (origin or destination updated)
+  let routeChanged = false;
+  if (filteredUpdates.origin_stop_id || filteredUpdates.destination_stop_id) {
     const originStopId = filteredUpdates.origin_stop_id || ride.origin_stop_id;
     const destinationStopId = filteredUpdates.destination_stop_id || ride.destination_stop_id;
 
@@ -242,19 +345,33 @@ const updateRideById = async (rideId, driverId, updates) => {
       throw new Error("Origin and destination must belong to the same route");
     }
 
-    // Add route_id to update
-    filteredUpdates.route_id = originStop.route_id;
+    // If route_id changed, mark routeChanged = true
+    if (originStop.route_id.toString() !== ride.route_id.toString()) {
+      routeChanged = true;
+      filteredUpdates.route_id = originStop.route_id;
+    }
   }
 
-  // Find and update only if ride belongs to the current driver
+  // Perform the update
   const updatedRide = await Ride.findOneAndUpdate(
     { _id: rideId, driver_id: driverId },
     { $set: filteredUpdates },
     { new: true }
   );
 
+  // If route changed, cancel associated pending/accepted ride requests
+  if (routeChanged) {
+    // we should implement this helper service to update ride requests status & notify riders
+    await cancelAffectedRideRequestsDueToRouteChange(rideId,filteredUpdates.route_id);
+  }else{
+    if ('departure_time' in filteredUpdates || 'available_seats' in filteredUpdates) {
+      await notifyRideDetailsUpdated(rideId);
+    }
+  }
+
   return updatedRide;
 };
+
 
 
 //delete-ride
@@ -263,7 +380,7 @@ const deleteRide=async(rideId,driverId)=>{
   const ride = await Ride.findOne({
     _id: rideId,
     driver_id: driverId,
-    status: "Active"
+    status: { $in: ['Scheduled', 'Active'] }
   })
 
   if (!ride) {
@@ -276,24 +393,53 @@ const deleteRide=async(rideId,driverId)=>{
 }
 
 // ride.service.js
-const completeRide = async (rideId, driverId) => {
-  const ride = await Ride.findOne({
-    _id: rideId,
-    driver_id: driverId,
-    status: "Active"
+// const completeRide = async (rideId, driverId) => {
+//   const ride = await Ride.findOne({
+//     _id: rideId,
+//     driver_id: driverId,
+//     status: "Active"
+//   });
+
+//   if (!ride) {
+//     throw new Error("Ride not found or already cancelled");
+//   }
+
+//   ride.status = "Completed";
+//   await ride.save();
+//   return ride;
+// };
+
+
+const notifyRideDetailsUpdated = async (rideId) => {
+  // Find all pending or accepted ride requests for this ride
+  const requests = await RideRequest.find({
+    ride_id: rideId,
+    status: { $in: ['Pending', 'Accepted'] },
   });
 
-  if (!ride) {
-    throw new Error("Ride not found or already cancelled");
-  }
+  // Fire notifications asynchronously (don't await inside forEach)
+  const notifyPromises = requests.map(async (request) => {
+    const rider = await User.findById(request.rider_id);
 
-  ride.status = "Completed";
-  await ride.save();
-  return ride;
+    if (rider?.fcmToken) {
+      try {
+        await admin.messaging().send({
+          token: rider.fcmToken,
+          notification: {
+            title: 'Ride Details Updated',
+            body: 'The departure time or seat availability for your requested ride has changed. Please check the updated ride details.',
+          },
+        });
+      } catch (err) {
+        console.error(`Failed to notify rider ${request.rider_id}:`, err);
+      }
+    } else {
+      console.log(`Rider ${request.rider_id} has no FCM token; skipping notification.`);
+    }
+  });
+
+  await Promise.all(notifyPromises);
 };
-
-
-
 
 const getRideDetails = async (ride_id, { user_id }) => {
   const ride = await Ride.findOne({ _id: ride_id, driver_id: user_id });
@@ -342,6 +488,7 @@ const getRideDetails = async (ride_id, { user_id }) => {
     destination_stop_id:ride.destination_stop_id,
     departure_time: ride.departure_time,
     available_seats: ride.available_seats,
+    status:ride.status,
     route_id: ride.route_id,
     subroutes: subrouteDetails
   };
@@ -489,6 +636,36 @@ const getRiderPreviousRides = async (user_id) => {
   return formattedRides;
 };
 
+const startRide = async (rideId, driverId) => {
+  console.log("service");
+  console.log(rideId,driverId);
+  const ride = await Ride.findOne({ _id: rideId, driver_id: driverId });
+  console.log(ride);
+  if (!ride) throw new Error("Ride not found or unauthorized");
+  if (ride.status !== "Scheduled") throw new Error("Ride cannot be started");
+
+  ride.status = "Active";
+  ride.start_time = new Date();
+
+  await ride.save();
+
+  return ride;
+};
+
+const endRide = async (rideId, driverId) => {
+  const ride = await Ride.findOne({ _id: rideId, driver_id: driverId });
+
+  if (!ride) throw new Error("Ride not found or unauthorized");
+  if (ride.status !== "Active") throw new Error("Ride cannot be completed");
+
+  ride.status = "Completed";
+  ride.end_time = new Date();
+
+  await ride.save();
+
+  return ride;
+};
+
 module.exports={
   createRide,
   searchRidesByIntermediateStops,
@@ -500,5 +677,9 @@ module.exports={
   getSegmentAvailability,
   canAcceptRideRequest,
   getRiderPreviousRides,
-  completeRide
+  // completeRide,
+  cancelAffectedRideRequestsDueToRouteChange,
+  startRide,
+  endRide,
+  notifyRideDetailsUpdated
 };

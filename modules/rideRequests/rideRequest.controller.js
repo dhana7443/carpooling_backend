@@ -3,12 +3,12 @@ const rideRequestService = require("./rideRequest.service");
 exports.sendRideRequest = async (req, res) => {
   try {
     const riderId = req.user.user_id; // from authMiddleware
-    console.log(riderId);
+    
     const { ride_id,from_stop,to_stop} = req.body;
-    console.log(ride_id,from_stop,to_stop);
+    
     const request = await rideRequestService.createRideRequest(riderId, ride_id,from_stop,to_stop);
     res.status(201).json({ message: "Ride request sent successfully", request });
-    console.log({request});
+    
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -16,9 +16,11 @@ exports.sendRideRequest = async (req, res) => {
 
 exports.getRiderRequests = async (req, res) => {
     try {
+      console.log("controller got hit")
       const riderId = req.user.user_id;
-  
-      const requests = await rideRequestService.getRequestsByRider(riderId);
+      console.log("user_id:",riderId);
+      const requests = await rideRequestService.getRiderRequests(riderId);
+      console.log("requests fetched:",requests);
       res.json({ requests });
     } catch (err) {
       res.status(400).json({ error: err.message });

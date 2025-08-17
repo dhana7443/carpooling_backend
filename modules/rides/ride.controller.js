@@ -89,7 +89,7 @@ exports.completeRide = async (req, res) => {
   console.log(rideId);
   console.log(driverId);
   try {
-    const ride = await rideService.completeRide(rideId, driverId);
+    const ride = await rideService.endRide(rideId, driverId);
     res.status(200).json({
       message: 'Ride marked as completed successfully',
       ride,
@@ -169,3 +169,39 @@ exports.getRiderPreviousRides=async(req,res)=>{
     })
   }
 };
+
+exports.startRide=async(req,res)=>{
+  try{
+    const driverId=req.user.user_id;
+    const {rideId}=req.params;
+    console.log("startride");
+    console.log(driverId,rideId);
+    const ride=await rideService.startRide(rideId,driverId);
+    res.status(200).json({
+      success:true,
+      ride
+    })
+  }catch(error){
+    res.status(500).json({
+      success:false,
+      message:'Failed to update ride start_time'
+    })
+  }
+}
+
+// exports.endRide=async(req,res)=>{
+//   try{
+//     const {driverId}=req.user.user_id;
+//     const {rideId}=req.params;
+//     const ride=await rideService.endRide(rideId,driverId);
+//     res.status(200).json({
+//       success:true,
+//       ride
+//     })
+//   }catch(error){
+//     res.status(500).json({
+//       success:false,
+//       message:'Failed to update ride start_time'
+//     })
+//   }
+// }

@@ -286,6 +286,7 @@ exports.getUserProfile = async (userId, roleName) => {
   return response;
 };
 
+//update profile
 exports.updateUserProfile = async (userId, roleName, updateData) => {
   const allowedFields = ["name","email","phone","gender"];
   if (roleName === "driver") {

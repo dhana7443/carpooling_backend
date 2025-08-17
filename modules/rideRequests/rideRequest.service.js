@@ -30,7 +30,7 @@ exports.createRideRequest = async (riderId, rideId, fromStop, toStop) => {
   const ride = await Ride.findById(rideId);
   const driver = await User.findById(ride.driver_id);
   const rider = await User.findById(riderId);
-  console.log("driver fetched:",driver);
+  
   if (driver?.fcmToken) {
     try{
       await admin.messaging().send({
@@ -52,34 +52,36 @@ exports.createRideRequest = async (riderId, rideId, fromStop, toStop) => {
     console.log("Driver has no FCM token stored, cannot send notification.");
   }
 
-  console.log(driver);
+  
   return request;
 };
 
 
 
-exports.getRequestsByRider = async (riderId) => {
-  const requests = await RideRequest.find({ rider_id: riderId })
-    .populate({
-      path: "ride_id",
-      populate: [
-        { path: "origin_stop_id", select: "stop_name -_id" },
-        { path: "destination_stop_id", select: "stop_name -_id" }
-      ],
-      select: "origin_stop_id destination_stop_id departure_time"
-    })
-    .sort({ requested_at: -1 });
-
-  // Format clean response
-  return requests.map(req => ({
-    ride_id: req.ride_id?._id,
-    origin_stop_name: req.ride_id?.origin_stop_id?.stop_name || null,
-    destination_stop_name: req.ride_id?.destination_stop_id?.stop_name || null,
-    departure_time: req.ride_id?.departure_time || null,
-    status: req.status,
-    requested_at: req.requested_at
-  }));
-};
+// exports.getRequestsByRider = async (riderId) => {
+//   console.log("called service");
+//   const requests = await RideRequest.find({ rider_id: riderId })
+//     .populate({
+//       path: "ride_id",
+//       populate: [
+//         { path: "origin_stop_id", select: "stop_name -_id" },
+//         { path: "destination_stop_id", select: "stop_name -_id" }
+//       ],
+//       select: "origin_stop_id destination_stop_id departure_time"
+//     })
+//     .sort({ requested_at: -1 });
+  
+  
+//   // Format clean response
+//   return requests.map(req => ({
+//     ride_id: req.ride_id?._id,
+//     origin_stop_name: req.ride_id?.origin_stop_id?.stop_name || null,
+//     destination_stop_name: req.ride_id?.destination_stop_id?.stop_name || null,
+//     departure_time: req.ride_id?.departure_time || null,
+//     status: req.status,
+//     requested_at: req.requested_at
+//   }));
+// };
 
 //ride-status
 exports.updateRideRequestStatus = async (requestId, status, driverId) => {
@@ -91,12 +93,12 @@ exports.updateRideRequestStatus = async (requestId, status, driverId) => {
   if (!rideRequest) {
     throw new Error("Ride request not found");
   }
-  console.log(rideRequest);
+  
   
   // Check if driver owns the ride for this request
   const ride = await Ride.findById(rideRequest.ride_id);
   if (!ride) throw new Error("Associated ride not found");
-  console.log(ride);
+  
   if (ride.driver_id.toString() !== driverId) {
     throw new Error("Unauthorized: You can only update requests for your rides");
   }
@@ -116,7 +118,7 @@ exports.updateRideRequestStatus = async (requestId, status, driverId) => {
         body: message,
       },
     });
-    console.log(message);
+    
   }
   return rideRequest;
 };
@@ -136,6 +138,12 @@ exports.getRequestsForRide = async (rideId, driverId) => {
     RideRequest.find({ ride_id: ride._id }).populate("rider_id", "_id name email"),
   ]);
   console.log(originStop,destinationStop,requests);
+
+  if (!originStop || !destinationStop) {
+    throw new Error("Origin or destination stop not found");
+  }
+
+
   return {
     ride_id: ride._id,
     origin: originStop?.stop_name || "Unknown",
@@ -179,10 +187,10 @@ exports.getUnseenRequestCount = async (rideId) => {
 exports.getRiderRequests = async (user_id) => {
   // Fetch all ride requests made by this rider
   const now=new Date();
-  const requests = await RideRequest.find({ rider_id: user_id,status: { $in: ['Pending', 'Accepted','CompletedByRider'] } })
+  const requests = await RideRequest.find({ rider_id: user_id})
     .populate({
       path: 'ride_id',
-      match:{status:'Active'},
+      match:{status: { $in: ['Scheduled', 'Active'] }},
       select: 'origin_stop_id destination_stop_id departure_time',
       populate: [
         { path: 'origin_stop_id', select: 'stop_name' },
@@ -191,12 +199,17 @@ exports.getRiderRequests = async (user_id) => {
     })
     .select('ride_id from_stop to_stop status requested_at')
     .sort({ requested_at: -1 }); // latest first
-  console.log(requests);
+  console.log("requestsofrider:",requests);
 
   const filtered = requests.filter(req => {
   if (!req.ride_id) return false;
-  return new Date(req.ride_id.departure_time) >= now;
+  
+  const departureTime = new Date(req.ride_id.departure_time);
+  
+  // Show if ride is in future OR ride is ongoing and not completed
+  return departureTime >= now || req.ride_id.status !== 'completed';
   });
+
   // Format response
   const formatted = filtered.map((req) => ({
     request_id: req._id,
