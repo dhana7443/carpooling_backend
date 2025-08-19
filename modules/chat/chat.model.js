@@ -20,7 +20,15 @@ const chatMessageSchema = new mongoose.Schema(
     message: { 
       type: String, 
       required: true 
-    }
+    },
+    reply_to: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "ChatMessage", default: null 
+    }, 
+    deleted: { 
+      type: Boolean, 
+      default: false 
+    },
   },
   { 
     timestamps: { 

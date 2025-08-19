@@ -96,7 +96,7 @@ io.on("connection", (socket) => {
   });
 
   //  Handle sending message
-  socket.on("sendMessage", async ({ rideId, message ,localId}) => {
+  socket.on("sendMessage", async ({ rideId, message ,localId,replyTo}) => {
     try {
       const userId = socket.user.user_id;
 
@@ -115,7 +115,8 @@ io.on("connection", (socket) => {
         rideId,
         senderId: userId,
         senderRole: socket.user.role_name,
-        message
+        message,
+        replyTo
       });
 
       const msg = {
@@ -125,6 +126,7 @@ io.on("connection", (socket) => {
         role: saved.sender_role,
         message: saved.message,
         timestamp: saved.createdAt,
+        replyTo:saved.reply_to,
         localId
       };
 
