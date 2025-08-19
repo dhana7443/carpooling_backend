@@ -7,6 +7,9 @@ const rideRequestRoutes=require("./modules/rideRequests/rideRequest.routes")
 const notificationRoutes=require('./modules/notifications/notification.routes');
 const paymentRoutes=require('./modules/payments/payment.routes');
 const walletRoutes=require('./modules/wallets/wallet.routes');
+const chatRoutes=require("./modules/chat/chat.routes");
+
+
 
 const app = express();
 app.use(express.json());
@@ -22,5 +25,6 @@ app.use("/api/ride-requests",rideRequestRoutes);
 app.use("/api/notifications",notificationRoutes);
 app.use("/api/payments",paymentRoutes);
 app.use("/api/wallets",walletRoutes);
+app.use("/api/chats",chatRoutes);
 
 module.exports = app;

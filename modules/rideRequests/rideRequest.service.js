@@ -213,6 +213,7 @@ exports.getRiderRequests = async (user_id) => {
   // Format response
   const formatted = filtered.map((req) => ({
     request_id: req._id,
+    rider_id: req.rider_id,
     status: req.status,
     requested_at: req.requested_at,
     from: req.from_stop,

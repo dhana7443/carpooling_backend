@@ -14,6 +14,8 @@ exports.authMiddleware = (req, res, next) => {
     res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
+
 exports.isAdmin = (requiredRole) => {
   return (req, res, next) => {
     const userRole = req.user?.role_name; // assuming req.user is populated from auth middleware

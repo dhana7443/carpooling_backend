@@ -14,18 +14,18 @@ exports.sendRideRequest = async (req, res) => {
   }
 };
 
-exports.getRiderRequests = async (req, res) => {
-    try {
-      console.log("controller got hit")
-      const riderId = req.user.user_id;
-      console.log("user_id:",riderId);
-      const requests = await rideRequestService.getRiderRequests(riderId);
-      console.log("requests fetched:",requests);
-      res.json({ requests });
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  };
+// exports.getRiderRequests = async (req, res) => {
+//     try {
+//       console.log("controller got hit")
+//       const riderId = req.user.user_id;
+//       console.log("user_id:",riderId);
+//       const requests = await rideRequestService.getRiderRequests(riderId);
+//       console.log("requests fetched:",requests);
+//       res.json({ requests });
+//     } catch (err) {
+//       res.status(400).json({ error: err.message });
+//     }
+//   };
   
   
   exports.updateRequestStatus = async (req, res) => {
