@@ -2,42 +2,38 @@ const mongoose = require("mongoose");
 
 const chatMessageSchema = new mongoose.Schema(
   {
-    ride_id: {
-       type: mongoose.Schema.Types.ObjectId, 
-       ref: 'Ride', 
-       required: true, 
-       index: true 
-      },
+    conversation_id: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Conversation", 
+      required: true, 
+      index: true 
+    },
     sender_id: { 
       type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User', 
+      ref: "User", 
       required: true 
     },
     sender_role: { 
-      type: String, enum: ['driver', 'rider', 'system'], 
+      type: String, enum: ["driver", "rider", "system"], 
       required: true 
     },
     message: { 
       type: String, 
-      required: true 
-    },
+      required: true },
     reply_to: { 
       type: mongoose.Schema.Types.ObjectId, 
-      ref: "ChatMessage", default: null 
-    }, 
+      ref: "ChatMessage", 
+      default: null 
+    },
     deleted: { 
       type: Boolean, 
-      default: false 
-    },
+      default: false },
   },
-  { 
-    timestamps: { 
-    type: Date, default: Date.now
-  } 
-}
+  { timestamps: true }
 );
 
-// Helpful compound index for pagination
-chatMessageSchema.index({ ride_id: 1, createdAt: -1 });
+chatMessageSchema.index({ conversation_id: 1, createdAt: -1 });
 
 module.exports = mongoose.model("ChatMessage", chatMessageSchema);
+
+

@@ -1,4 +1,5 @@
 const rideService = require("./ride.service");
+const Ride=require("./ride.model");
 
 exports.createRide = async (req, res) => {
   try {
@@ -189,19 +190,16 @@ exports.startRide=async(req,res)=>{
   }
 }
 
-// exports.endRide=async(req,res)=>{
-//   try{
-//     const {driverId}=req.user.user_id;
-//     const {rideId}=req.params;
-//     const ride=await rideService.endRide(rideId,driverId);
-//     res.status(200).json({
-//       success:true,
-//       ride
-//     })
-//   }catch(error){
-//     res.status(500).json({
-//       success:false,
-//       message:'Failed to update ride start_time'
-//     })
-//   }
-// }
+exports.getRideInfo = async (req, res) => {
+  try {
+    const { rideId } = req.params;
+    const ride = await Ride.findById(rideId).select("_id driver_id");
+    if (!ride) return res.status(404).json({ message: "Ride not found" });
+
+    res.status(200).json({ rideId: ride._id, driverId: ride.driver_id });
+    console.log("driverId:",ride.driver_id);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

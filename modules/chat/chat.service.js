@@ -1,29 +1,111 @@
 const ChatMessage=require("./chat.model");
+const Conversation=require("../conversations/conversation.model");
 
-exports.saveMessage = async ({ rideId, senderId, senderRole, message,replyTo }) => {
-  
-  const doc = await ChatMessage.create({
+exports.getOrCreateConversation = async ({ rideId, userId, recipientId, userRole }) => {
+  let driverId, riderId;
+
+  if (userRole === 'driver') {
+    driverId = userId;
+    riderId = recipientId;
+  } else {
+    riderId = userId;
+    driverId = recipientId;
+  }
+
+  // Find existing conversation
+  let conversation = await Conversation.findOne({
     ride_id: rideId,
+    driver_id: driverId,
+    rider_id: riderId,
+  });
+
+  if (!conversation) {
+    // Create new conversation
+    conversation = await Conversation.create({
+      ride_id: rideId,
+      driver_id: driverId,
+      rider_id: riderId,
+    });
+  }
+
+  return conversation;
+};
+
+exports.saveMessage = async ({ rideId, senderId, senderRole, message,replyTo ,recipientId}) => {
+  
+  let driverId, riderId;
+  if (senderRole === "driver") {
+    driverId = senderId;
+    riderId = recipientId;
+  } else {
+    riderId = senderId;
+    driverId = recipientId;
+  }
+
+  // 2. Find or create conversation
+  let conversation = await Conversation.findOne({ ride_id: rideId, driver_id: driverId, rider_id: riderId });
+  if (!conversation) {
+    conversation = await Conversation.create({
+      ride_id: rideId,
+      driver_id: driverId,
+      rider_id: riderId,
+    });
+  }
+
+  // 3. Save message under this conversation
+  const doc = await ChatMessage.create({
+    conversation_id: conversation._id,
     sender_id: senderId,
     sender_role: senderRole,
     message,
-    reply_to:replyTo
+    reply_to: replyTo || null,
   });
-  return doc.populate("reply_to","message sender_id");
+
+  conversation.lastMessage=message;
+  await conversation.save();
+
+  const populatedDoc = await ChatMessage.findById(doc._id)
+  .populate("reply_to", "message sender_id")
+  .populate("sender_id", "_id name");
+
+  // Convert sender_id to string for consistent use
+  const formattedDoc = {
+    _id: populatedDoc._id,
+    conversation_id: populatedDoc.conversation_id,
+    sender_id: populatedDoc.sender_id._id.toString(), // ✅ always string
+    sender_name: populatedDoc.sender_id.name,         // optional, for frontend
+    sender_role: populatedDoc.sender_role,
+    message: populatedDoc.message,
+    reply_to: populatedDoc.reply_to
+      ? {
+          _id: populatedDoc.reply_to._id.toString(),
+          message: populatedDoc.reply_to.message,
+        }
+      : null,
+    createdAt: populatedDoc.createdAt,
+  };
+  
+return formattedDoc;
+
+
 };
 
-exports.getHistory = async ({ rideId, limit = 50, before }) => {
-  const query = { ride_id: rideId };
+exports.getConversationHistory = async ({ conversationId, limit = 50, before }) => {
+  const query = { conversation_id: conversationId };
   if (before) query.createdAt = { $lt: new Date(before) };
 
   const docs = await ChatMessage
     .find(query)
     .sort({ createdAt: -1 })
     .limit(limit)
+    .populate("sender_id","_id name")
+    .populate("reply_to","message sender_id")
     .lean();
 
+    console.log("history:",docs);
   return docs.reverse(); // oldest → newest
 };
+
 
 // Delete a single message
 exports.deleteMessage = async ({ messageId, userId }) => {
