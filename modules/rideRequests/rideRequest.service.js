@@ -57,32 +57,6 @@ exports.createRideRequest = async (riderId, rideId, fromStop, toStop) => {
 };
 
 
-
-// exports.getRequestsByRider = async (riderId) => {
-//   console.log("called service");
-//   const requests = await RideRequest.find({ rider_id: riderId })
-//     .populate({
-//       path: "ride_id",
-//       populate: [
-//         { path: "origin_stop_id", select: "stop_name -_id" },
-//         { path: "destination_stop_id", select: "stop_name -_id" }
-//       ],
-//       select: "origin_stop_id destination_stop_id departure_time"
-//     })
-//     .sort({ requested_at: -1 });
-  
-  
-//   // Format clean response
-//   return requests.map(req => ({
-//     ride_id: req.ride_id?._id,
-//     origin_stop_name: req.ride_id?.origin_stop_id?.stop_name || null,
-//     destination_stop_name: req.ride_id?.destination_stop_id?.stop_name || null,
-//     departure_time: req.ride_id?.departure_time || null,
-//     status: req.status,
-//     requested_at: req.requested_at
-//   }));
-// };
-
 //ride-status
 exports.updateRideRequestStatus = async (requestId, status, driverId) => {
   if (!["Accepted", "Rejected"].includes(status)) {
@@ -278,3 +252,29 @@ exports.riderMarkComplete=async(requestId,riderId)=>{
 
   return request;
 };
+
+exports.getRideRequest=async(requestId)=>{
+  const request=await RideRequest.findById(requestId);
+
+  if (!request) {
+    throw new Error("Ride request not found");
+  }
+
+  const ride=await Ride.findById(request.ride_id);
+  if (!ride) throw new Error('Ride not found');
+
+  const driver=await User.findById(ride.driver_id);
+  if (!driver) throw new Error('Driver not found');
+
+  return{
+    driver_id:driver._id,
+    driver_name:driver.name,
+    ride_id:ride._id,
+
+  }
+  console.log(request)
+
+
+  return request; 
+
+}

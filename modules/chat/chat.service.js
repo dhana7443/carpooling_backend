@@ -72,8 +72,8 @@ exports.saveMessage = async ({ rideId, senderId, senderRole, message,replyTo ,re
   const formattedDoc = {
     _id: populatedDoc._id,
     conversation_id: populatedDoc.conversation_id,
-    sender_id: populatedDoc.sender_id._id.toString(), // ✅ always string
-    sender_name: populatedDoc.sender_id.name,         // optional, for frontend
+    sender_id: populatedDoc.sender_id._id.toString(), 
+    sender_name: populatedDoc.sender_id.name,         
     sender_role: populatedDoc.sender_role,
     message: populatedDoc.message,
     reply_to: populatedDoc.reply_to

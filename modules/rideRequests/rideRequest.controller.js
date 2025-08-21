@@ -14,18 +14,7 @@ exports.sendRideRequest = async (req, res) => {
   }
 };
 
-// exports.getRiderRequests = async (req, res) => {
-//     try {
-//       console.log("controller got hit")
-//       const riderId = req.user.user_id;
-//       console.log("user_id:",riderId);
-//       const requests = await rideRequestService.getRiderRequests(riderId);
-//       console.log("requests fetched:",requests);
-//       res.json({ requests });
-//     } catch (err) {
-//       res.status(400).json({ error: err.message });
-//     }
-//   };
+
   
   
   exports.updateRequestStatus = async (req, res) => {
@@ -130,4 +119,18 @@ exports.riderMarkComplete=async(req,res)=>{
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
+}
+
+exports.getRideRequest=async(req,res)=>{
+  try{
+    const {requestId}=req.params;
+    const userId=req.user.user_id;
+
+    const driverInfo=await rideRequestService.getRideRequest(requestId);
+    res.status(200).json(driverInfo);
+
+  }catch(err){
+    res.status(400).json({message:err.message});
+  }
+
 }
